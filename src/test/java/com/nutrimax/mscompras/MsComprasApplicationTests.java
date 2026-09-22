@@ -1,4 +1,4 @@
-package com.nutrimax.ms_compras;
+package com.nutrimax.mscompras;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
