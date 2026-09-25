@@ -8,11 +8,14 @@ import com.nutrimax.mscompras.model.Pedido;
 import com.nutrimax.mscompras.repository.PedidoRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +26,12 @@ public class PedidoService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${ms.usuarios.url}")
+    private String msUsuariosUrl;
 
     // RF-CO-01: obtener o crear el carrito activo del usuario
     public Pedido obtenerOCrearCarrito(Long usuarioId) {
@@ -95,10 +104,23 @@ public class PedidoService {
                 .map(item -> new OrderConfirmedEvent.ItemEvento(item.getProductoId(), item.getCantidad()))
                 .collect(Collectors.toList());
 
+        String email = obtenerEmailUsuario(pedido.getUsuarioId());
+
         OrderConfirmedEvent evento = new OrderConfirmedEvent(
-                pedido.getId(), pedido.getUsuarioId(), pedido.getTotal(), itemsEvento);
+                pedido.getId(), pedido.getUsuarioId(), email, pedido.getTotal(), itemsEvento);
 
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, evento);
+    }
+
+    private String obtenerEmailUsuario(Long usuarioId) {
+        try {
+            Map<String, Object> usuario = restTemplate.getForObject(
+                    msUsuariosUrl + "/api/usuarios/" + usuarioId, Map.class);
+            return usuario != null ? (String) usuario.get("email") : null;
+        } catch (Exception e) {
+            System.out.println("No se pudo obtener el email del usuario " + usuarioId + ": " + e.getMessage());
+            return null;
+        }
     }
 
     // RF-CO-03: historial de pedidos

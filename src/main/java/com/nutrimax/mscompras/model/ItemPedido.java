@@ -13,6 +13,7 @@ public class ItemPedido {
 
     @ManyToOne
     @JoinColumn(name = "pedido_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("items")
     private Pedido pedido;
 
     @Column(nullable = false)

@@ -8,15 +8,17 @@ public class OrderConfirmedEvent implements Serializable {
 
     private Long pedidoId;
     private Long usuarioId;
+    private String email;
     private BigDecimal total;
     private List<ItemEvento> items;
 
     public OrderConfirmedEvent() {
     }
 
-    public OrderConfirmedEvent(Long pedidoId, Long usuarioId, BigDecimal total, List<ItemEvento> items) {
+    public OrderConfirmedEvent(Long pedidoId, Long usuarioId, String email, BigDecimal total, List<ItemEvento> items) {
         this.pedidoId = pedidoId;
         this.usuarioId = usuarioId;
+        this.email = email;
         this.total = total;
         this.items = items;
     }
@@ -35,6 +37,14 @@ public class OrderConfirmedEvent implements Serializable {
 
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public BigDecimal getTotal() {
